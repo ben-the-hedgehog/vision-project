@@ -1,4 +1,4 @@
-from keras.layers import Dense, Flatten
+from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, BatchNormalization, Dropout
 from keras.models import Sequential
 from keras.callbacks import Callback
 import pandas as pd
@@ -49,11 +49,30 @@ def load_fer2013():
 train_faces, train_emotions, val_faces, val_emotions = load_fer2013()
 num_samples, num_classes = train_emotions.shape
 
+img_h = train_faces.shape[1]
+img_w = train_faces.shape[2]
+
 train_faces /= 255.
 val_faces /= 255.
 
 model = Sequential()
+
+#Convolution layers
+model.add(Conv2D(32, (7, 7), input_shape=(img_h, img_w, 1), activation = 'relu'))
+model.add(BatchNormalization())
+model.add(MaxPooling2D())
+model.add(Conv2D(64, (5, 5), activation = 'relu'))
+model.add(BatchNormalization())
+model.add(MaxPooling2D())
+model.add(Conv2D(128, (3, 3), activation = 'relu'))
+model.add(BatchNormalization())
+model.add(MaxPooling2D())
+model.add(Dropout(0.5))
+# Inference layers
 model.add(Flatten(input_shape=input_shape))
+model.add(Dense(50, activation='relu'))
+model.add(BatchNormalization())
+model.add(Dropout(0.4))
 model.add(Dense(num_classes, activation="softmax"))
 
 model.compile(optimizer='adam', loss='categorical_crossentropy',
